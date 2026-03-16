@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Martina Marino | UX/UI Designer</title>
+
+    <!-- Preload critical assets: tells the browser to fetch these BEFORE it discovers them in HTML,
+         shaving hundreds of ms off LCP (Largest Contentful Paint) -->
+    <link rel="preload" href="cover-hd-opt.mp4" as="video" type="video/mp4">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" as="style">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+
+        /* ── Page loader — minimal centered counter ──────────────── */
+        .page-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: var(--white-10, #F5F5F5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease, visibility 0s 0.5s;
+        }
+        .page-loader.loaded {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .loader-counter {
+            font-family: 'Inter', sans-serif;
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--black-90, #171717);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── Figma design tokens ─────────────────────────────────────── */
+        :root {
+            --black-90:  #171717;
+            --white-10:  #F5F5F5;
+            --grey-49:   #7E7E7E;
+        }
+
+        /* ── Base ────────────────────────────────────────────────────── */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--white-10);
+            color: var(--black-90);
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ── Floating video ──────────────────────────────────────────── */
+        .floating-video-container {
+            position: fixed;
+            top: 140px;
+            left: calc(50% - 297px);
+            width: 594px;
+            height: 332px; /* overridden by JS → 3.4 × header height */
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            z-index: 40;
+            pointer-events: none;
+        }
+
+        /* ── Custom cursor ───────────────────────────────────────────── */
+        .custom-cursor {
+            width: 20px;
+            height: 20px;
+            background: rgba(23,23,23,0.12);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* ── CTA button wrapper ──────────────────────────────────────── */
+        .btn-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            overflow: visible; /* always visible — disk hidden via visibility */
+        }
+
+        /* ── CTA pill button ─────────────────────────────────────────── */
+        .cta-btn {
+            position: relative;
+            background: var(--black-90);
+            color: var(--white-10);
+            border: none;
+            cursor: pointer;
+            height: 54px;
+            padding: 0 32px;
+            border-radius: 999px;
+            font-size: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        /* ── Slot-machine text roller ────────────────────────────────── */
+        .btn-text-roller {
+            overflow: hidden;
+            height: 1.25em;
+            line-height: 1.25em;
+        }
+        .btn-text-inner {
+            display: block;
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .btn-wrapper:hover .btn-text-inner {
+            transform: translateY(-100%);
+        }
+
+        /* ── Rolling emoji disk ──────────────────────────────────────── */
+        .rolling-disk {
+            position: absolute;
+            right: 100%;
+            top: 50%;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: var(--black-90);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            line-height: 1;
+            /* hidden: shifted right behind the button */
+            transform: translateY(-50%) translateX(calc(100% + 4px)) rotate(0deg);
+            visibility: hidden;
+            opacity: 0;
+            transition: transform 0.55s cubic-bezier(0.19, 1, 0.22, 1),
+                        opacity  0.3s ease,
+                        visibility 0s 0.3s; /* hide after fade-out completes */
+            pointer-events: none;
+            z-index: 0;
+        }
+        .btn-wrapper:hover .rolling-disk {
+            /* rolls out to 4px gap from button */
+            transform: translateY(-50%) translateX(-4px) rotate(-360deg);
+            visibility: visible;
+            opacity: 1;
+            transition: transform 0.55s cubic-bezier(0.19, 1, 0.22, 1),
+                        opacity  0.25s ease,
+                        visibility 0s 0s; /* show immediately */
+        }
+
+        /* ── Hero title images ───────────────────────────────────────── */
+        .hero-title-images {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            gap: 1.5%;
+        }
+        /* Distribute based on actual image pixel widths (1172 : 2152) */
+        .hero-title-images img:first-child { flex: 1172; min-width: 0; }
+        .hero-title-images img:last-child  { flex: 2152; min-width: 0; }
+        .hero-title-images img {
+            height: auto;
+            width: 100%;
+            display: block;
+        }
+
+        /* ── Hero nav labels (Figma: med-20) ─────────────────────────── */
+        .nav-label {
+            font-size: 20px;
+            font-weight: 500;
+            line-height: 1;
+        }
+        .nav-label-primary { color: var(--white-10); }
+        .nav-label-secondary { color: var(--grey-49); margin-top: 6px; }
+
+        /* ── About Me section ────────────────────────────────────────── */
+        .about-section {
+            background: var(--white-10);
+            padding: 80px 40px;
+            margin: 0 -20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 1300px;
+            box-sizing: border-box;
+        }
+
+        .about-content-row {
+            flex: 1;
+            display: flex;
+            gap: 80px;
+            align-items: center;
+            min-height: 0;
+        }
+
+        .about-text-col {
+            flex: 1 0 0;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .about-video-col {
+            flex: 1 0 0;
+            min-width: 0;
+            align-self: stretch;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #e0e0e0;
+        }
+
+        .about-video-col video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* ── Scroll-reveal text (About Me — Figma: ~35px, regular+semibold) */
+        .scroll-text {
+            font-size: clamp(1rem, 2.3vw, 35px);
+            font-weight: 400;
+            line-height: 1.3;
+            text-align: left;
+            margin: 0;
+            color: var(--black-90);
+            word-wrap: break-word;
+        }
+        .scroll-text strong {
+            font-weight: 600; /* Figma: SemiBold */
+        }
+        .scroll-text .split-char {
+            display: inline-block;
+            will-change: transform, opacity;
+        }
+        .scroll-text .split-word {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        /* ── Responsive: stack on smaller screens ────────────────────── */
+        @media (max-width: 900px) {
+            .about-section {
+                min-height: unset;
+                padding: 60px 24px;
+            }
+            .about-content-row {
+                flex-direction: column;
+                gap: 40px;
+            }
+            .about-text-col {
+                flex: none;
+                width: 100%;
+            }
+            .about-video-col {
+                flex: none;
+                width: 100%;
+                align-self: auto;
+                aspect-ratio: 935 / 623;
+                height: auto;
+            }
+            .scroll-text {
+                font-size: clamp(1rem, 4vw, 28px);
+            }
+        }
+
+        /* ── Bottom navbar ───────────────────────────────────────────── */
+        .bottom-navbar {
+            background: var(--black-90);
+            border-radius: 20px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            height: 120px;
+            width: min(868px, 55vw);
+            transition: transform 0.35s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .bottom-navbar:hover {
+            transform: scale(1.02);
+        }
+        .navbar-avatar {
+            width: 100px;
+            height: 100px;
+            min-width: 100px;
+            background: #F8F6F5;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .navbar-avatar video {
+            width: 115%;
+            height: auto;
+            object-fit: contain;
+            position: relative;
+            z-index: 1;
+            animation: logo-breathe 4s ease-in-out infinite;
+        }
+        @keyframes logo-breathe {
+            0%   { transform: scale(1)    rotate(0deg); }
+            25%  { transform: scale(1.02) rotate(0.8deg); }
+            50%  { transform: scale(1)    rotate(0deg); }
+            75%  { transform: scale(1.02) rotate(-0.8deg); }
+            100% { transform: scale(1)    rotate(0deg); }
+        }
+        .navbar-name {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--white-10);
+            text-transform: uppercase;
+        }
+        .navbar-skills-marquee {
+            overflow: hidden;
+            white-space: nowrap;
+            width: 100%;
+        }
+        .navbar-skills-content {
+            display: inline-block;
+            animation: marquee 50s linear infinite;
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--grey-49);
+            white-space: nowrap;
+        }
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            flex-shrink: 0;
+        }
+        .navbar-divider {
+            width: 1px;
+            height: 32px;
+            background: rgba(245, 245, 245, 0.15);
+        }
+        .navbar-icon-btn {
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            opacity: 0.7;
+        }
+        .navbar-icon-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        /* Copied toast */
+        .copy-toast {
+            position: fixed;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: var(--black-90);
+            color: var(--white-10);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 12px 24px;
+            border-radius: 999px;
+            border: 1px solid rgba(245, 245, 245, 0.1);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 300;
+        }
+        .copy-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ── WORK heading images (Figma: WORK 663×238, '25 288×238) ──── */
+        .work-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .work-heading img { height: auto; display: block; }
+        .work-img-title { width: min(663px, 42vw); }     /* WORK */
+        .work-img-year  { width: min(288px, 18vw); }      /* '25  */
+
+        /* ── Project card grid (Figma: 2-col, gap 10) ────────────────── */
+        .work-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            width: 100%;
+            padding: 24px 0;
+        }
+        @media (max-width: 768px) {
+            .work-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ── Project cards (Figma: bg #171717, rounded-8, p-20/48) ────── */
+        .project-card {
+            background: #171717;
+            border-radius: 8px;
+            padding: 20px 20px 48px;
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            min-width: 0; /* prevent grid blowout */
+        }
+        .project-card:hover { transform: scale(0.985); }
+        .project-card-link { display: contents; }
+
+        .card-image {
+            width: 100%;
+            aspect-ratio: 760 / 535;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.7s ease;
+        }
+        .project-card:hover .card-image img { transform: scale(1.04); }
+
+        .card-bottom { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+        .card-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-width: 0;
+        }
+        .card-avatar-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .card-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        .card-name {
+            font-size: clamp(14px, 1.6vw, 28px);
+            font-weight: 500;
+            color: #F5F5F5;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
+        }
+        .card-type-year {
+            font-size: clamp(12px, 1.4vw, 28px);
+            font-weight: 500;
+            color: #F5F5F5;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* ── Marquee ─────────────────────────────────────────────────── */
+        .marquee-container { overflow: hidden; white-space: nowrap; width: 100%; }
+        .marquee-content { display: inline-block; animation: marquee 25s linear infinite; }
+        @keyframes marquee {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .card-tags {
+            font-size: clamp(12px, 1.1vw, 20px);
+            font-weight: 300;
+            color: #F5F5F5;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        /* ── Video modal (Flow Pilot) ──────────────────────────────── */
+        .video-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease, background 0.4s ease;
+        }
+        .video-modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+            background: rgba(0, 0, 0, 0.92);
+        }
+        .video-modal {
+            position: relative;
+            width: calc(100vw - 80px);
+            max-width: 1600px;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            transform: translateY(30px) scale(0.95);
+            transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+        }
+        @media (max-width: 768px) {
+            .video-modal {
+                width: calc(100vw - 32px);
+                border-radius: 12px;
+            }
+        }
+        .video-modal-overlay.active .video-modal {
+            transform: translateY(0) scale(1);
+        }
+        .video-modal video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .video-modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--black-90);
+            color: var(--white-10);
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: transform 0.2s ease;
+        }
+        .video-modal-close:hover { transform: scale(1.1); }
+
+        /* ── Scroll reveal ───────────────────────────────────────────── */
+        .scroll-reveal { opacity: 0; transform: translateY(20px); transition: all 0.6s ease-out; }
+        .scroll-reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* ── Services section ───────────────────────────────────────── */
+        .services-outer {
+            background: var(--black-90);
+            border-radius: 40px;
+            padding: 80px 20px 20px;
+        }
+        .services-label {
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #b5b5b5;
+            margin: 0 0 24px;
+            padding: 0 40px;
+        }
+        .services-hero-text {
+            font-size: clamp(2rem, 5vw, 58px);
+            font-weight: 500;
+            line-height: 1.18;
+            color: var(--white-10);
+            margin: 0 0 64px;
+            max-width: 1200px;
+            padding: 0 40px;
+        }
+        .services-hero-text .split-char {
+            display: inline-block;
+            will-change: transform, opacity;
+        }
+        .services-hero-text .split-word {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        /* Service rows container */
+        .services-rows {
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Service row: 4-column grid ────────────────────────────── */
+        .service-row {
+            background: #262626;
+            position: relative;
+            display: grid;
+            grid-template-columns: 48px 1fr 1fr auto;
+            gap: 24px;
+            align-items: start;
+            padding: 48px 40px;
+        }
+        /* Inset divider line — top border on every row except first */
+        .service-row + .service-row::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 40px;
+            right: 40px;
+            height: 0.5px;
+            background: rgba(181, 181, 181, 0.35);
+        }
+
+        /* Number */
+        .service-num {
+            font-size: 20px;
+            font-weight: 500;
+            color: #b5b5b5;
+            padding-top: 10px;
+        }
+
+        /* Title */
+        .service-title {
+            font-size: clamp(24px, 3vw, 40px);
+            font-weight: 500;
+            line-height: 1.2;
+            color: var(--white-10);
+            margin: 0;
+        }
+
+        /* Desc + chips column */
+        .service-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .service-desc {
+            font-size: clamp(14px, 1.2vw, 18px);
+            font-weight: 500;
+            line-height: 1.55;
+            color: #d4d4d4;
+            margin: 0;
+        }
+        .service-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .service-chip {
+            background: rgba(245, 245, 245, 0.1);
+            color: #f5f5f5;
+            font-size: 13px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 1.1px;
+            line-height: 1;
+            padding: 7px 12px 6px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        /* Image */
+        .service-img {
+            width: clamp(180px, 22vw, 340px);
+            aspect-ratio: 382 / 275;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        .service-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Scroll-reveal for service rows */
+        .service-row .split-char {
+            display: inline-block;
+            will-change: transform, opacity;
+        }
+        .service-row .split-word {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        /* ── Responsive: services ──────────────────────────────────── */
+        @media (max-width: 1023px) {
+            .services-outer { padding: 60px 16px 16px; }
+            .services-label { padding: 0 24px; }
+            .services-hero-text { padding: 0 24px; }
+            .service-row {
+                grid-template-columns: 40px 1fr;
+                grid-template-rows: auto auto auto;
+                gap: 16px;
+                padding: 40px 24px;
+            }
+            .service-row + .service-row::before { left: 24px; right: 24px; }
+            .service-title { grid-column: 2; }
+            .service-detail { grid-column: 1 / -1; }
+            .service-img {
+                grid-column: 1 / -1;
+                width: 100%;
+                aspect-ratio: 16 / 9;
+            }
+        }
+        @media (max-width: 600px) {
+            .services-outer { padding: 40px 12px 12px; border-radius: 24px; }
+            .services-label { padding: 0 16px; }
+            .services-hero-text { padding: 0 16px; margin-bottom: 40px; }
+            .service-row { padding: 24px 16px; gap: 12px; }
+            .service-row + .service-row::before { left: 16px; right: 16px; }
+            .service-chip { font-size: 11px; padding: 6px 10px 5px; letter-spacing: 0.8px; }
+        }
+
+        /* ── Tools / Professional At section (Figma 125:406) ────────── */
+        .tools-section {
+            background: var(--white-10);
+            padding: 80px 40px 200px; /* extra bottom for navbar clearance */
+            margin: 0 -20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 1000px; /* 1300px × 0.7692 = About Me − 23.08% */
+            box-sizing: border-box;
+        }
+        .tools-label {
+            font-size: 24px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--black-90);
+            padding: 24px 0;
+            margin: 0;
+        }
+        .tools-grid {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        /* Each row fills equal vertical space */
+        .tools-row {
+            flex: 1;
+            display: flex;
+            width: 100%;
+        }
+        .tool-cell {
+            flex: 1 0 0;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #ededed;
+            background: transparent;
+            cursor: pointer;
+            transition: background-color 0.25s ease;
+        }
+        /* Vertical separators — all non-first cells get a left border */
+        .tool-cell + .tool-cell {
+            border-left: 1px solid #ededed;
+        }
+
+        /* Icon container — overflow:hidden clips baked-in image shadows */
+        .tool-icon {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: transform 0.25s ease, filter 0.25s ease;
+        }
+        .tool-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        /* 365: slightly larger per Figma (77px) */
+        .tool-icon-365 {
+            width: 77px;
+            height: 77px;
+        }
+        /* Midjourney: 84px with rounded white bg per Figma */
+        .tool-icon-midj {
+            width: 84px;
+            height: 84px;
+            border-radius: 24px;
+            background: #fff;
+            overflow: hidden;
+            transition: transform 0.25s ease, filter 0.25s ease;
+        }
+        .tool-icon-midj img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* ── Hover: cell → black-90 | entire icon frame → scale 1.07 + saturate 1.05 ── */
+        .tool-cell:hover {
+            background-color: var(--black-90);
+        }
+        .tool-cell:hover .tool-icon {
+            transform: scale(1.07);
+            filter: saturate(1.05);
+        }
+
+        /* ── Responsive: <1024px ─────────────────────────────────── */
+        @media (max-width: 1023px) {
+            .tools-section {
+                min-height: unset;
+                padding: 60px 24px 180px;
+            }
+            /* Row 2 (6 items): 3 cols × 2 rows */
+            .tools-row-6 { flex-wrap: wrap; }
+            .tools-row-6 .tool-cell { flex: 1 0 calc(33.333% - 1px); min-height: 120px; }
+            /* Row 3 (4 items): 2 cols × 2 rows */
+            .tools-row-4 { flex-wrap: wrap; }
+            .tools-row-4 .tool-cell { flex: 1 0 calc(50% - 1px); min-height: 120px; }
+        }
+        @media (max-width: 600px) {
+            .tools-section { padding: 40px 16px 180px; }
+            .tools-row { flex-wrap: wrap; }
+            .tools-row .tool-cell { flex: 1 0 calc(50% - 1px); min-height: 110px; }
+            .tool-icon { width: 50px; height: 50px; }
+            .tool-icon-365 { width: 56px; height: 56px; }
+            .tool-icon-midj { width: 60px; height: 60px; }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="page-loader" id="page-loader">
+        <span class="loader-counter" id="loader-counter">0%</span>
+    </div>
+
+    <div id="custom-cursor" class="custom-cursor"></div>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         HEADER  (fixed — mix-blend-difference auto-inverts on bg)
+         ════════════════════════════════════════════════════════════════ -->
+    <!-- Labels only — mix-blend-difference applies to text, not the button -->
+    <header class="fixed top-0 left-0 w-full flex items-end z-50 mix-blend-difference" style="padding: 40px;">
+        <div class="flex" style="gap: 100px;">
+            <div class="nav-label">
+                <p class="nav-label-primary">Martina Marino</p>
+                <p class="nav-label-secondary">Designer</p>
+            </div>
+            <div class="nav-label">
+                <p class="nav-label-primary">Freelance availability</p>
+                <p class="nav-label-secondary">Now</p>
+            </div>
+            <div class="nav-label">
+                <p class="nav-label-primary">Italy Based</p>
+                <p class="nav-label-secondary">Working Globally</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- CTA button: lives outside the header so it's never affected by mix-blend-difference -->
+    <div class="btn-wrapper" style="position: fixed; top: 40px; right: 40px; z-index: 51;">
+        <div class="rolling-disk" aria-hidden="true">🤟🏻</div>
+        <a href="mailto:martinamarinodesign@gmail.com" class="cta-btn" style="text-decoration: none;">
+            <span class="btn-text-roller">
+                <span class="btn-text-inner">Get in touch</span>
+                <span class="btn-text-inner">Get in touch</span>
+            </span>
+        </a>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         FLOATING VIDEO  (height set by JS → 3.4 × header height)
+         ════════════════════════════════════════════════════════════════ -->
+    <div id="video-container" class="floating-video-container">
+        <video id="main-visual" class="w-full h-full object-cover" autoplay muted loop playsinline>
+            <source src="cover-hd-opt.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         HERO SECTION  (light bg, content at bottom)
+         ════════════════════════════════════════════════════════════════ -->
+    <div id="hero-wrapper" style="margin: -20px; background: var(--white-10); min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 40px 40px 40px;">
+
+        <!-- YOUR … NEXT  (24px medium, caps) -->
+        <div style="display: flex; justify-content: space-between; width: min(50vw, 847px); margin-bottom: 0;">
+            <span style="font-size: 24px; font-weight: 500; text-transform: uppercase; color: var(--black-90);">YOUR</span>
+            <span style="font-size: 24px; font-weight: 500; text-transform: uppercase; color: var(--black-90);">NEXT</span>
+        </div>
+
+        <!-- UX/UI  DESIGNER  (PNG images, scale together) -->
+        <div class="hero-title-images" style="margin-bottom: 40px;">
+            <img src="UXUI.png" alt="UX/UI">
+            <img src="DESIGNER.png" alt="DESIGNER">
+        </div>
+
+        <!-- Bottom bar: ↓ Scroll | (space for fixed navbar) | Projects ↓ -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div style="display: flex; align-items: center; gap: 4px; font-size: 20px; font-weight: 500; color: var(--black-90);">
+                <i class="fas fa-arrow-down" style="font-size: 16px;"></i>
+                <span>Scroll</span>
+            </div>
+            <!-- Invisible spacer where the fixed navbar overlaps -->
+            <div style="width: min(868px, 55vw);"></div>
+            <div style="display: flex; align-items: center; gap: 4px; font-size: 20px; font-weight: 500; color: var(--black-90);">
+                <span>Projects</span>
+                <i class="fas fa-arrow-down" style="font-size: 16px;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spacer: keeps content below the absolute full-screen video -->
+    <div id="video-scroll-spacer" style="background: var(--white-10); margin: 0 -20px;"></div>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         MYSELF SECTION  (scroll-reveal text + sticky photo)
+         ════════════════════════════════════════════════════════════════ -->
+    <section class="about-section">
+        <!-- ABOUT ME label (Figma: 24px bold, py-24) -->
+        <div style="padding: 24px 0;">
+            <p style="font-size: 24px; font-weight: 700; text-transform: uppercase; color: var(--black-90); margin: 0;">ABOUT ME</p>
+        </div>
+
+        <!-- Text + Video row (Figma 137:1718: flex, gap-80, items-center, flex-1 each side) -->
+        <div class="about-content-row">
+
+            <!-- Text col (Figma: flex-1, ~35px, regular + semibold) -->
+            <div class="about-text-col" id="scroll-reveal-container">
+                <div id="scroll-reveal-text" class="scroll-text">
+                    <p style="margin: 0;">I came to design through <strong>fine arts and new media</strong> — which really just means I spent years looking at things before anyone asked me to turn them into screens. That habit never left.</p>
+                    <p style="margin: 1.3em 0 0;">Now I work across <strong>UX, UI, and generative AI</strong>, and I care about all three being done well, not just done fast. I've designed <strong>banking and public admin interfaces</strong> at Accenture Song, edited medical video courses in Berlin, and co-wrote a jingle that ended up on <strong>national TV</strong>. I use AI tools daily and I have <strong>zero patience for slop</strong>.</p>
+                    <p style="margin: 1.3em 0 0;">Off-screen: theatre, acoustic guitar, kung fu. Best place on earth: <strong>Berlin in the summer</strong>.</p>
+                </div>
+            </div>
+
+            <!-- Video col (Figma: flex-1, self-stretch, rounded-15, NO audio) -->
+            <div class="about-video-col">
+                <video autoplay muted loop playsinline preload="auto">
+                    <source src="compressed-opt.mp4" type="video/mp4">
+                </video>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         WORK SECTION
+         ════════════════════════════════════════════════════════════════ -->
+    <section style="background: var(--white-10); padding: 80px 40px; margin: 0 -20px;">
+
+        <!-- ── BIG TEXT: WORK + '25 images (Figma: 663×238 + 288×238) ── -->
+        <div class="work-heading">
+            <img class="work-img-title" src="https://www.figma.com/api/mcp/asset/21c237c1-211d-4f65-b455-37bf1bdb5562" alt="WORK">
+            <img class="work-img-year"  src="https://www.figma.com/api/mcp/asset/766b6d8c-7b1d-4d6f-b735-c227a5b50297" alt="'25">
+        </div>
+
+        <!-- ── 2-col responsive card grid (Figma: gap 10, all 6 cards) ── -->
+        <div class="work-grid">
+
+            <!-- CARD 1: CREON -->
+            <a href="creon.html" style="text-decoration: none; color: inherit;" class="project-card-link">
+            <div class="project-card">
+                <div class="card-image">
+                    <img src="https://www.figma.com/api/mcp/asset/23b0e915-d07b-4bba-ab48-9cdcc09ba38e" alt="Creon">
+                </div>
+                <div class="card-bottom">
+                    <div class="card-top-row">
+                        <div class="card-avatar-name">
+                            <div class="card-avatar"><img src="https://www.figma.com/api/mcp/asset/b7e02567-6f9a-44e8-a09e-3ffe7a849603" alt=""></div>
+                            <span class="card-name">CREON</span>
+                        </div>
+                        <span class="card-type-year">PORTFOLIO // 2025</span>
+                    </div>
+                    <div class="marquee-container">
+                        <div class="marquee-content card-tags">
+                            MOBILE APP DESIGN &nbsp;·&nbsp; CONVERSATIONAL AI COMPANION &nbsp;·&nbsp; ADV CAMPAIGN &nbsp;·&nbsp; PRODUCT DESIGN &nbsp;·&nbsp;&nbsp;
+                            MOBILE APP DESIGN &nbsp;·&nbsp; CONVERSATIONAL AI COMPANION &nbsp;·&nbsp; ADV CAMPAIGN &nbsp;·&nbsp; PRODUCT DESIGN &nbsp;·&nbsp;&nbsp;
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </a>
+
+            <!-- CARD 2: POLESTAR REDESIGN -->
+            <a href="polestar.html" style="text-decoration: none; color: inherit;" class="project-card-link">
+            <div class="project-card">
+                <div class="card-image">
+                    <img src="https://www.figma.com/api/mcp/asset/f2ec6253-c3f7-44c0-a7cc-62cdf04741da" alt="Polestar Redesign">
+                </div>
+                <div class="card-bottom">
+                    <div class="card-top-row">
+                        <div class="card-avatar-name">
+                            <div class="card-avatar"><img src="https://www.figma.com/api/mcp/asset/83cf5950-0ea0-4393-bd46-1352fa6ba50c" alt=""></div>
+                            <span class="card-name">POLESTAR REDESIGN</span>
+                        </div>
+                        <span class="card-type-year">PORTFOLIO // 2024</span>
+                    </div>
+                    <div class="marquee-container">
+                        <div class="marquee-content card-tags">
+                            GENERATIVE AI &nbsp;·&nbsp; OMNICHANNEL EXPERIENCE &nbsp;·&nbsp; PRODUCT DESIGN &nbsp;·&nbsp; UX/UI DESIGN &nbsp;·&nbsp; BRAND IDENTITY &nbsp;·&nbsp;&nbsp;
+                            GENERATIVE AI &nbsp;·&nbsp; OMNICHANNEL EXPERIENCE &nbsp;·&nbsp; PRODUCT DESIGN &nbsp;·&nbsp; UX/UI DESIGN &nbsp;·&nbsp; BRAND IDENTITY &nbsp;·&nbsp;&nbsp;
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </a>
+
+            <!-- CARD 3: IKEA // NATURALLY INDOOR -->
+            <a href="ikea.html" style="text-decoration: none; color: inherit;" class="project-card-link">
+            <div class="project-card">
+                <div class="card-image">
+                    <img src="https://www.figma.com/api/mcp/asset/819849e7-236b-4038-ab32-6ec8ce5e750f" alt="IKEA Naturally Indoor">
+                </div>
+                <div class="card-bottom">
+                    <div class="card-top-row">
+                        <div class="card-avatar-name">
+                            <div class="card-avatar"><img src="https://www.figma.com/api/mcp/asset/31347b3c-8ee0-4391-ba21-ad0114caa97d" alt=""></div>
+                            <span class="card-name">IKEA // NATURALLY INDOOR</span>
+                        </div>
+                        <span class="card-type-year">PORTFOLIO // 2024</span>
+                    </div>
+                    <div class="marquee-container">
+                        <div class="marquee-content card-tags">
+                            GENERATIVE AI &nbsp;·&nbsp; CAMPAIGN &nbsp;·&nbsp; PRODUCT DESIGN &nbsp;·&nbsp; INTERIOR DESIGN &nbsp;·&nbsp;&nbsp;
+                            GENERATIVE AI &nbsp;·&nbsp; CAMPAIGN &nbsp;·&nbsp; PRODUCT DESIGN &nbsp;·&nbsp; INTERIOR DESIGN &nbsp;·&nbsp;&nbsp;
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </a>
+
+            <!-- CARD 4: MANTA REI - VR GAME -->
+            <a href="mantarei.html" style="text-decoration: none; color: inherit;" class="project-card-link">
+            <div class="project-card">
+                <div class="card-image">
+                    <img src="https://www.figma.com/api/mcp/asset/d7a2da55-57bb-4fd5-acfb-2e0db9357f74" alt="Manta Rei VR Game">
+                </div>
+                <div class="card-bottom">
+                    <div class="card-top-row">
+                        <div class="card-avatar-name">
+                            <div class="card-avatar"><img src="https://www.figma.com/api/mcp/asset/f1163450-27fc-4730-9218-bb12d502aeb3" alt=""></div>
+                            <span class="card-name">MANTA REI - VR GAME</span>
+                        </div>
+                        <span class="card-type-year">PORTFOLIO // 2024</span>
+                    </div>
+                    <div class="marquee-container">
+                        <div class="marquee-content card-tags">
+                            VR GAME &nbsp;·&nbsp; GENERATIVE AI &nbsp;·&nbsp; PRODUCT DESIGN &nbsp;·&nbsp; GAME DESIGN &nbsp;·&nbsp; CHARACTER DESIGN &nbsp;·&nbsp;&nbsp;
+                            VR GAME &nbsp;·&nbsp; GENERATIVE AI &nbsp;·&nbsp; PRODUCT DESIGN &nbsp;·&nbsp; GAME DESIGN &nbsp;·&nbsp; CHARACTER DESIGN &nbsp;·&nbsp;&nbsp;
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </a>
+
+            <!-- CARD 5: FLOW PILOT - CRM APP -->
+            <div class="project-card" data-video-modal style="cursor: pointer;">
+                <div class="card-image">
+                    <img src="https://www.figma.com/api/mcp/asset/34c7d2a2-ac71-4690-a0b6-dc6a5df7fe78" alt="Flow Pilot CRM App">
+                </div>
+                <div class="card-bottom">
+                    <div class="card-top-row">
+                        <div class="card-avatar-name">
+                            <div class="card-avatar"><img src="https://www.figma.com/api/mcp/asset/40789edb-f88a-427e-873f-84dcaae3a86c" alt=""></div>
+                            <span class="card-name">FLOW PILOT - CRM APP</span>
+                        </div>
+                        <span class="card-type-year">PORTFOLIO // 2025</span>
+                    </div>
+                    <div class="marquee-container">
+                        <div class="marquee-content card-tags">
+                            UX/UI DESIGN &nbsp;·&nbsp; CRM &nbsp;·&nbsp; TABLET INTERFACE &nbsp;·&nbsp; DIGITAL PRODUCT DESIGN &nbsp;·&nbsp;&nbsp;
+                            UX/UI DESIGN &nbsp;·&nbsp; CRM &nbsp;·&nbsp; TABLET INTERFACE &nbsp;·&nbsp; DIGITAL PRODUCT DESIGN &nbsp;·&nbsp;&nbsp;
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD 6: REMGEN - APP CONCEPT -->
+            <a href="remgen.html" style="text-decoration: none; color: inherit;" class="project-card-link">
+            <div class="project-card">
+                <div class="card-image">
+                    <img src="https://www.figma.com/api/mcp/asset/09e4d544-3ec7-4fd7-b8a5-34e506bbde8a" alt="Remgen App Concept">
+                </div>
+                <div class="card-bottom">
+                    <div class="card-top-row">
+                        <div class="card-avatar-name">
+                            <div class="card-avatar"><img src="https://www.figma.com/api/mcp/asset/3e7d1267-ecc7-437e-b6a8-b874b1fb9103" alt=""></div>
+                            <span class="card-name">REMGEN - APP CONCEPT</span>
+                        </div>
+                        <span class="card-type-year">PORTFOLIO // 2024</span>
+                    </div>
+                    <div class="marquee-container">
+                        <div class="marquee-content card-tags">
+                            MOBILE APP DESIGN &nbsp;·&nbsp; GENERATIVE AI &nbsp;·&nbsp; CAMPAIGN &nbsp;·&nbsp; PRODUCT DESIGN &nbsp;·&nbsp;&nbsp;
+                            MOBILE APP DESIGN &nbsp;·&nbsp; GENERATIVE AI &nbsp;·&nbsp; CAMPAIGN &nbsp;·&nbsp; PRODUCT DESIGN &nbsp;·&nbsp;&nbsp;
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </a>
+
+        </div><!-- /work-grid -->
+
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         SERVICES SECTION  (Figma 152:2820 — SERVICES_WORKING)
+         ════════════════════════════════════════════════════════════════ -->
+    <section class="services-outer" id="services-section">
+        <p class="services-label">Services</p>
+        <h2 class="services-hero-text" id="services-hero-text">I design interfaces, identities, and AI-driven workflows — with the same care whether it's a banking app or a campaign that ends up on national TV. Every project gets the full picture: research, craft, and a complete refusal to ship anything I wouldn't use myself.</h2>
+
+        <div class="services-rows">
+
+            <!-- ── 01 — UX/UI Design ────────────────────────────────── -->
+            <div class="service-row" data-service-row>
+                <span class="service-num">01</span>
+                <h3 class="service-title">UX/UI Design</h3>
+                <div class="service-detail">
+                    <p class="service-desc">End-to-end product design, from research to tested prototypes. I've worked on regulated interfaces for banking and public services at Accenture Song, and built a full SaaS product from zero as my master's thesis. I care a lot about things making sense to the person who has to use them — that's where most of the work actually happens.</p>
+                    <div class="service-chips">
+                        <span class="service-chip">UI</span>
+                        <span class="service-chip">UX</span>
+                        <span class="service-chip">User Research</span>
+                        <span class="service-chip">Prototyping</span>
+                        <span class="service-chip">Usability Testing</span>
+                        <span class="service-chip">Web Design</span>
+                        <span class="service-chip">Mobile App Design</span>
+                        <span class="service-chip">Design Systems</span>
+                    </div>
+                </div>
+                <div class="service-img">
+                    <img src="placeholder images/creon placeholder.webp" alt="UX/UI Design">
+                </div>
+            </div>
+
+            <!-- ── 02 — AI-Integrated Design ────────────────────────── -->
+            <div class="service-row" data-service-row>
+                <span class="service-num">02</span>
+                <h3 class="service-title">AI-Integrated Design</h3>
+                <div class="service-detail">
+                    <p class="service-desc">I use AI every day — to generate, to iterate, to push a brief further than it would've gone on its own. But I also know when to close the tool and start designing. The skill isn't prompting. It's taste: knowing what to keep, what to rework, and what to throw away entirely.</p>
+                    <div class="service-chips">
+                        <span class="service-chip">Generative AI</span>
+                        <span class="service-chip">Prompt Engineering</span>
+                        <span class="service-chip">AI Workflows</span>
+                        <span class="service-chip">Midjourney</span>
+                        <span class="service-chip">Concept Development</span>
+                        <span class="service-chip">Rapid Prototyping</span>
+                    </div>
+                </div>
+                <div class="service-img">
+                    <img src="placeholder images/ikea placeholder.webp" alt="AI-Integrated Design">
+                </div>
+            </div>
+
+            <!-- ── 03 — Brand & Creative Direction ──────────────────── -->
+            <div class="service-row" data-service-row>
+                <span class="service-num">03</span>
+                <h3 class="service-title">Brand & Creative Direction</h3>
+                <div class="service-detail">
+                    <p class="service-desc">Visual worlds that hold together across screens, campaigns, and physical space. My projects have ranged from automotive redesigns to AI-generated furniture collections — always with the same focus: making the brand feel like one voice, not a collection of deliverables hoping for the best.</p>
+                    <div class="service-chips">
+                        <span class="service-chip">Art Direction</span>
+                        <span class="service-chip">Branding</span>
+                        <span class="service-chip">Graphic Design</span>
+                        <span class="service-chip">Motion Design</span>
+                        <span class="service-chip">Video Editing</span>
+                        <span class="service-chip">Campaign Design</span>
+                    </div>
+                </div>
+                <div class="service-img">
+                    <img src="placeholder images/polestar placeholder.webp" alt="Brand & Creative Direction">
+                </div>
+            </div>
+
+        </div><!-- /services-rows -->
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         TOOLS / PROFESSIONAL AT  (Figma 125:406)
+         ════════════════════════════════════════════════════════════════ -->
+    <section class="tools-section">
+        <p class="tools-label">PROFESSIONAL AT</p>
+
+        <div class="tools-grid">
+            <!-- ── Row 1: RECTANGLES — 3 cols (Figma, Claude, Lovable) ─── -->
+            <div class="tools-row tools-row-3">
+                <div class="tool-cell">
+                    <div class="tool-icon"><img src="placeholder images/figma.png" alt="Figma"></div>
+                </div>
+                <div class="tool-cell">
+                    <div class="tool-icon"><img src="placeholder images/Frame 2.png" alt="Claude"></div>
+                </div>
+                <div class="tool-cell">
+                    <div class="tool-icon"><img src="placeholder images/lovable.png" alt="Lovable"></div>
+                </div>
+            </div>
+
+            <!-- ── Row 2: SQUARES — 6 cols (Firefly, Ps, Ae, Pr, Lr, Ai) ── -->
+            <div class="tools-row tools-row-6">
+                <div class="tool-cell">
+                    <div class="tool-icon"><img src="placeholder images/adobefirefly.png" alt="Adobe Firefly"></div>
+                </div>
+                <div class="tool-cell">
+                    <div class="tool-icon"><img src="placeholder images/photoshop.png" alt="Photoshop"></div>
+                </div>
+                <div class="tool-cell">
+                    <div class="tool-icon"><img src="placeholder images/ae.png" alt="After Effects"></div>
+                </div>
+                <div class="tool-cell">
+                    <div class="tool-icon"><img src="placeholder images/premierepro.png" alt="Premiere Pro"></div>
+                </div>
+                <div class="tool-cell">
+                    <div class="tool-icon"><img src="placeholder images/lightroom.png" alt="Lightroom"></div>
+                </div>
+                <div class="tool-cell">
+                    <div class="tool-icon"><img src="placeholder images/adobeillustrator.png" alt="Illustrator"></div>
+                </div>
+            </div>
+
+            <!-- ── Row 3: RECTANGLES — 4 cols (Framer, M365, Midjourney, Notion) ── -->
+            <div class="tools-row tools-row-4">
+                <div class="tool-cell">
+                    <div class="tool-icon"><img src="placeholder images/framer.png" alt="Framer"></div>
+                </div>
+                <div class="tool-cell">
+                    <div class="tool-icon tool-icon-365"><img src="placeholder images/365.png" alt="Microsoft 365"></div>
+                </div>
+                <div class="tool-cell">
+                    <div class="tool-icon tool-icon-midj"><img src="placeholder images/MIDJ.png" alt="Midjourney"></div>
+                </div>
+                <div class="tool-cell">
+                    <div class="tool-icon"><img src="placeholder images/NOTION.png" alt="Notion"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         VIDEO MODAL (Flow Pilot)
+         ════════════════════════════════════════════════════════════════ -->
+    <div class="video-modal-overlay" id="video-modal">
+        <div class="video-modal">
+            <button class="video-modal-close" id="video-modal-close">&times;</button>
+            <video id="video-modal-player" preload="metadata" playsinline>
+                <source src="flowpilot-opt.mp4" type="video/mp4">
+            </video>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         BOTTOM NAVBAR  (fixed)
+         ════════════════════════════════════════════════════════════════ -->
+    <div class="fixed z-50" style="bottom: 40px; left: 50%; transform: translateX(-50%);">
+        <div class="bottom-navbar">
+            <div class="navbar-avatar">
+                <video autoplay muted loop playsinline>
+                    <source src="star-opt.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px;">
+                <span class="navbar-name">MARTINA MARINO</span>
+                <div class="navbar-skills-marquee">
+                    <span class="navbar-skills-content">
+                        UX/UI DESIGN &nbsp;·&nbsp; GENERATIVE AI &nbsp;·&nbsp; GRAPHIC DESIGN &nbsp;·&nbsp; MOTION DESIGN &nbsp;·&nbsp; VIDEO EDITING &nbsp;·&nbsp; SERVICE DESIGN &nbsp;·&nbsp; ART DIRECTION &nbsp;·&nbsp; BRANDING &nbsp;·&nbsp; UX RESEARCH &nbsp;·&nbsp; INTERIOR DESIGN &nbsp;·&nbsp;&nbsp;
+                        UX/UI DESIGN &nbsp;·&nbsp; GENERATIVE AI &nbsp;·&nbsp; GRAPHIC DESIGN &nbsp;·&nbsp; MOTION DESIGN &nbsp;·&nbsp; VIDEO EDITING &nbsp;·&nbsp; SERVICE DESIGN &nbsp;·&nbsp; ART DIRECTION &nbsp;·&nbsp; BRANDING &nbsp;·&nbsp; UX RESEARCH &nbsp;·&nbsp; INTERIOR DESIGN &nbsp;·&nbsp;&nbsp;
+                    </span>
+                </div>
+            </div>
+            <div class="navbar-actions">
+                <button class="navbar-icon-btn" id="phone-btn" title="Copy phone number">
+                    <img src="icon phone.svg" alt="Phone" style="width: 34px; height: 34px;">
+                </button>
+                <div class="navbar-divider"></div>
+                <a class="navbar-icon-btn" href="https://www.linkedin.com/in/martinamarinoo/" target="_blank" rel="noopener" title="LinkedIn">
+                    <img src="icon - linkedin.svg" alt="LinkedIn" style="width: 34px; height: 34px;">
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         SCRIPTS  (GSAP + Video logic)
+         ════════════════════════════════════════════════════════════════ -->
+    <!-- Copy-to-clipboard toast -->
+    <div class="copy-toast" id="copy-toast">Phone number copied</div>
+
+    <!-- Register Service Worker for offline caching -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <script>
+        /* ──────────────────────────────────────────────────────────────
+           0.  PAGE LOADER — Spring-animated counter (0 → 100)
+               Uses a damped spring simulation (same physics as Framer
+               Motion's useSpring). The counter tracks real loading
+               progress: jumps to milestones as assets load, then the
+               spring smoothly interpolates the displayed number.
+           ────────────────────────────────────────────────────────────── */
+        {
+            const loader    = document.getElementById('page-loader');
+            const counterEl = document.getElementById('loader-counter');
+            const heroVid   = document.getElementById('main-visual');
+
+            // ── Spring physics (matches Framer Motion defaults) ──────
+            // Attempt to match: damping ~40, stiffness ~50
+            let current  = 0;   // displayed value (spring output)
+            let target   = 0;   // where we want to go
+            let velocity = 0;   // current speed
+            const stiffness = 50;
+            const damping   = 40;
+            const mass      = 1;
+            const precision = 0.5; // close enough to snap
+            let dismissed = false;
+            let rafId;
+
+            function tick() {
+                // Spring force: F = -k(x - target) - d*v
+                const displacement = current - target;
+                const springForce  = -stiffness * displacement;
+                const dampingForce = -damping * velocity;
+                const acceleration = (springForce + dampingForce) / mass;
+
+                velocity += acceleration * (1 / 60); // assume 60fps step
+                current  += velocity * (1 / 60);
+
+                // Snap when close enough and slow enough
+                if (Math.abs(current - target) < precision && Math.abs(velocity) < precision) {
+                    current  = target;
+                    velocity = 0;
+                }
+
+                counterEl.textContent = Math.round(Math.min(current, 100)) + '%';
+
+                // If we've hit 100 and settled, dismiss
+                if (current >= 100 && target >= 100 && Math.abs(velocity) < 1) {
+                    dismiss();
+                    return;
+                }
+
+                rafId = requestAnimationFrame(tick);
+            }
+
+            function setProgress(val) {
+                target = Math.min(val, 100);
+            }
+
+            function dismiss() {
+                if (dismissed) return;
+                dismissed = true;
+                cancelAnimationFrame(rafId);
+                counterEl.textContent = '100%';
+                // Brief pause at 100 before fade-out
+                setTimeout(() => loader.classList.add('loaded'), 500);
+            }
+
+            // ── Skip loader on back/forward navigation ─────────────
+            // performance.navigation tells us HOW we got here:
+            //   'navigate' = fresh visit or link click → show loader
+            //   'back_forward' = back/forward button → skip loader
+            //   'reload' = refresh → show loader
+            const navType = performance.getEntriesByType('navigation')[0]?.type;
+            const isBackNav = navType === 'back_forward';
+
+            if (isBackNav) {
+                loader.style.display = 'none';
+                dismissed = true;
+            } else {
+                // ── Track real loading milestones ────────────────────
+                rafId = requestAnimationFrame(tick);
+
+                document.fonts.ready.then(() => setProgress(30));
+
+                if (heroVid) {
+                    if (heroVid.readyState >= 3) {
+                        setProgress(70);
+                    } else {
+                        heroVid.addEventListener('canplay', () => setProgress(70), { once: true });
+                    }
+                } else {
+                    setProgress(70);
+                }
+
+                window.addEventListener('load', () => setProgress(100));
+                setTimeout(() => { setProgress(100); }, 5000);
+            }
+
+            // Also handle bfcache restore (Safari, some Chrome)
+            window.addEventListener('pageshow', (e) => {
+                if (e.persisted && !dismissed) {
+                    loader.style.display = 'none';
+                    dismissed = true;
+                }
+            });
+
+            // ── Prefetch project pages in the background ─────────
+            // After the main page loads, quietly fetch project pages
+            // so they're in the browser's HTTP cache when clicked.
+            window.addEventListener('load', () => {
+                const pages = ['creon.html', 'polestar.html', 'ikea.html', 'mantarei.html', 'remgen.html'];
+                // Stagger prefetches to avoid bandwidth contention
+                pages.forEach((page, i) => {
+                    setTimeout(() => {
+                        const link = document.createElement('link');
+                        link.rel = 'prefetch';
+                        link.href = page;
+                        document.head.appendChild(link);
+                    }, 2000 + i * 1000);
+                });
+            });
+        }
+
+
+        /* ──────────────────────────────────────────────────────────────
+           1.  VIDEO LOGIC
+           ────────────────────────────────────────────────────────────── */
+        const videoContainer = document.getElementById('video-container');
+        const cursorEl       = document.getElementById('custom-cursor');
+
+        const MARGIN      = 20;
+        const VIDEO_W     = 594;
+        const VIDEO_BR    = 12;
+        const SCROLL_FULL = 500;
+
+        // ── Video height = 3.4 × header height ────────────────────────
+        const headerEl    = document.querySelector('header');
+        const headerH     = headerEl.offsetHeight;
+        const VIDEO_H     = Math.round(headerH * 3.4);
+        const VIDEO_TOP   = headerH + 20;  // just below the header with a small gap
+
+        // Apply initial dimensions
+        videoContainer.style.height = VIDEO_H + 'px';
+        videoContainer.style.top    = VIDEO_TOP + 'px';
+        videoContainer.style.left   = 'calc(50% - ' + (VIDEO_W / 2) + 'px)';
+
+        let cursorX = window.innerWidth / 2;
+
+        function clampLeft(raw) {
+            return Math.max(MARGIN, Math.min(window.innerWidth - MARGIN - VIDEO_W, raw));
+        }
+
+        /* ── Cursor tracking (horizontal-only, 1:1) ─────────────────── */
+        document.addEventListener('mousemove', (e) => {
+            cursorEl.style.left = e.clientX + 'px';
+            cursorEl.style.top  = e.clientY + 'px';
+            cursorX = e.clientX;
+
+            if (window.scrollY === 0) {
+                videoContainer.style.position = 'fixed';
+                videoContainer.style.left = clampLeft(cursorX - VIDEO_W / 2) + 'px';
+            }
+        });
+
+        /* ── Two-phase scroll ────────────────────────────────────────── */
+        window.addEventListener('scroll', () => {
+            const S = window.scrollY;
+
+            if (S <= SCROLL_FULL) {
+                const p = S / SCROLL_FULL;
+
+                const w = VIDEO_W + (window.innerWidth  - VIDEO_W)  * p;
+                const h = VIDEO_H + (window.innerHeight - VIDEO_H)  * p;
+                const t = VIDEO_TOP * (1 - p);
+                const r = VIDEO_BR * (1 - p);
+
+                const startLeft = clampLeft(cursorX - VIDEO_W / 2);
+                const l = startLeft * (1 - p);
+
+                videoContainer.style.position     = 'fixed';
+                videoContainer.style.width         = w + 'px';
+                videoContainer.style.height        = h + 'px';
+                videoContainer.style.top           = t + 'px';
+                videoContainer.style.left          = l + 'px';
+                videoContainer.style.borderRadius  = r + 'px';
+                videoContainer.style.transform     = 'none';
+
+
+
+            } else {
+                videoContainer.style.position     = 'absolute';
+                videoContainer.style.top          = SCROLL_FULL + 'px';
+                videoContainer.style.left         = '0';
+                videoContainer.style.width        = '100vw';
+                videoContainer.style.height       = '100vh';
+                videoContainer.style.borderRadius = '0';
+                videoContainer.style.transform    = 'none';
+
+            }
+
+            document.querySelectorAll('.scroll-reveal').forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight * 0.8) {
+                    el.classList.add('visible');
+                }
+            });
+        }, { passive: true });
+
+
+        /* ──────────────────────────────────────────────────────────────
+           2.  SCROLL SPACER
+           ────────────────────────────────────────────────────────────── */
+        function setSpacer() {
+            const spacer    = document.getElementById('video-scroll-spacer');
+            const spacerTop = spacer.getBoundingClientRect().top + window.scrollY;
+            const targetBottom = SCROLL_FULL + window.innerHeight;
+            spacer.style.height = Math.max(0, targetBottom - spacerTop) + 'px';
+        }
+        setSpacer();
+        window.addEventListener('resize', setSpacer);
+
+
+        /* ──────────────────────────────────────────────────────────────
+           3.  GSAP SCROLL-REVEAL  (Myself section — char-based, scroll-scrubbed)
+           ────────────────────────────────────────────────────────────── */
+        gsap.registerPlugin(ScrollTrigger);
+
+        const textEl    = document.getElementById('scroll-reveal-text');
+        const container = document.getElementById('scroll-reveal-container');
+
+        // Traverse all text nodes inside the paragraph, preserving <strong> etc.
+        // Split each text node into word-spans containing char-spans.
+        function splitTextNodes(root) {
+            const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+            const nodes = [];
+            let n;
+            while ((n = walker.nextNode())) nodes.push(n);
+
+            nodes.forEach(textNode => {
+                const raw = textNode.textContent;
+                if (!raw.trim()) return; // skip pure-whitespace nodes
+                const parent = textNode.parentNode;
+                const frag   = document.createDocumentFragment();
+
+                // Split on spaces to build word-spans, re-add spaces between
+                const parts = raw.split(/(\s+)/); // keeps whitespace tokens
+                parts.forEach(part => {
+                    if (/^\s+$/.test(part)) {
+                        // whitespace — keep as text so natural wrapping works
+                        frag.appendChild(document.createTextNode(part));
+                    } else if (part.length) {
+                        const wordSpan = document.createElement('span');
+                        wordSpan.className = 'split-word';
+                        part.split('').forEach(ch => {
+                            const charSpan = document.createElement('span');
+                            charSpan.className = 'split-char';
+                            charSpan.textContent = ch;
+                            wordSpan.appendChild(charSpan);
+                        });
+                        frag.appendChild(wordSpan);
+                    }
+                });
+
+                parent.replaceChild(frag, textNode);
+            });
+        }
+
+        splitTextNodes(textEl);
+        const chars = textEl.querySelectorAll('.split-char');
+
+        // Opacity + translateY, staggered per char, scrubbed with scroll
+        gsap.fromTo(chars,
+            { opacity: 0, y: 40 },
+            {
+                opacity: 1,
+                y: 0,
+                ease: 'power3.out',
+                stagger: 0.01,
+                scrollTrigger: {
+                    trigger: container,
+                    start: 'top 85%',      // starts shortly after entering viewport
+                    end: 'center center',  // fully revealed when container is centred
+                    scrub: true
+                }
+            }
+        );
+
+
+        /* ──────────────────────────────────────────────────────────────
+           4.  SERVICES SECTION — scroll-reveal text animation
+               (same char-split technique, but more subtle: starts
+               earlier, ends earlier, smaller y-offset)
+           ────────────────────────────────────────────────────────────── */
+
+        // Hero heading
+        const servicesHero = document.getElementById('services-hero-text');
+        splitTextNodes(servicesHero);
+        const servicesChars = servicesHero.querySelectorAll('.split-char');
+
+        gsap.fromTo(servicesChars,
+            { opacity: 0, y: 20 },
+            {
+                opacity: 1,
+                y: 0,
+                ease: 'power2.out',
+                stagger: 0.008,
+                scrollTrigger: {
+                    trigger: servicesHero,
+                    start: 'top 92%',
+                    end: 'top 45%',
+                    scrub: true
+                }
+            }
+        );
+
+        /* ──────────────────────────────────────────────────────────────
+           5.  VIDEO MODAL (Flow Pilot)
+               Opens a styled popup with the video. On end: fade to
+               black for 2s, then replay. Close via X, backdrop, or Esc.
+           ────────────────────────────────────────────────────────────── */
+        {
+            const overlay = document.getElementById('video-modal');
+            const video   = document.getElementById('video-modal-player');
+            const closeBtn = document.getElementById('video-modal-close');
+
+            // Click handler for Flow Pilot card
+            document.querySelectorAll('[data-video-modal]').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    overlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                    video.currentTime = 0;
+                    video.play();
+                });
+            });
+
+            // At video end: fade to black, wait 2s, replay
+            video.addEventListener('ended', () => {
+                video.style.opacity = '0';
+                video.style.transition = 'opacity 0.8s ease';
+                setTimeout(() => {
+                    video.currentTime = 0;
+                    video.play();
+                    // Fade back in
+                    requestAnimationFrame(() => {
+                        video.style.opacity = '1';
+                    });
+                }, 2000);
+            });
+
+            function closeVideoModal() {
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+                video.pause();
+                video.style.opacity = '1';
+                video.style.transition = 'none';
+            }
+
+            closeBtn.addEventListener('click', closeVideoModal);
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeVideoModal();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && overlay.classList.contains('active')) closeVideoModal();
+            });
+        }
+
+
+        // Service rows — animate title + desc text per row
+        document.querySelectorAll('[data-service-row]').forEach(row => {
+            const title = row.querySelector('.service-title');
+            const desc  = row.querySelector('.service-desc');
+
+            [title, desc].forEach(el => {
+                if (!el) return;
+                splitTextNodes(el);
+                const rowChars = el.querySelectorAll('.split-char');
+
+                gsap.fromTo(rowChars,
+                    { opacity: 0, y: 14 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        ease: 'power2.out',
+                        stagger: 0.006,
+                        scrollTrigger: {
+                            trigger: row,
+                            start: 'top 90%',
+                            end: 'top 50%',
+                            scrub: true
+                        }
+                    }
+                );
+            });
+
+            // Fade-in chips and image
+            const chips = row.querySelector('.service-chips');
+            const img   = row.querySelector('.service-img');
+            [chips, img].forEach(el => {
+                if (!el) return;
+                gsap.fromTo(el,
+                    { opacity: 0, y: 16 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        ease: 'power2.out',
+                        scrollTrigger: {
+                            trigger: row,
+                            start: 'top 85%',
+                            end: 'top 50%',
+                            scrub: true
+                        }
+                    }
+                );
+            });
+        });
+        /* ──────────────────────────────────────────────────────────────
+           7.  PHONE COPY TO CLIPBOARD
+           ────────────────────────────────────────────────────────────── */
+        document.getElementById('phone-btn').addEventListener('click', () => {
+            navigator.clipboard.writeText('+393278844719').then(() => {
+                const toast = document.getElementById('copy-toast');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            });
+        });
+    </script>
+</body>
+</html>

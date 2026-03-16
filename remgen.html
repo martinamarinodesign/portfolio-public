@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REMGEN — The Dream App</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #000; color: #f5f5f5; overflow-x: hidden; }
+
+        .project-header { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; padding: 20px 40px; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .project-header-left { display: flex; align-items: center; gap: 16px; }
+        .project-back { width: 40px; height: 40px; border-radius: 50%; background: rgba(245,245,245,0.08); border: none; color: #f5f5f5; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s ease; text-decoration: none; }
+        .project-back:hover { background: rgba(245,245,245,0.15); }
+        .project-header-title { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; color: #b5b5b5; }
+        .project-header-author { font-size: 13px; font-weight: 500; color: #666; }
+
+        .project-stream { width: 100%; display: flex; flex-direction: column; }
+        .project-module { width: 100%; opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .project-module.visible { opacity: 1; transform: translateY(0); }
+        .project-module img { width: 100%; height: auto; display: block; }
+
+        .img-loading { position: relative; overflow: hidden; background: #0a0a0a; }
+        .img-loading::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #0a0a0a 0%, #151515 40%, #1c1c1c 50%, #151515 60%, #0a0a0a 100%); background-size: 200% 100%; animation: shimmer 1.6s ease-in-out infinite; z-index: 1; transition: opacity 0.5s ease; pointer-events: none; }
+        .img-loading.loaded::after { opacity: 0; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        .project-footer { padding: 80px 40px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+        .project-footer-title { font-size: clamp(24px, 3vw, 40px); font-weight: 500; color: #f5f5f5; }
+        .project-footer-sub { font-size: 16px; color: #888; max-width: 500px; line-height: 1.6; }
+        .project-footer-cta { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: #f5f5f5; color: #171717; border-radius: 999px; font-size: 16px; font-weight: 600; text-decoration: none; transition: transform 0.2s ease, background 0.2s ease; }
+        .project-footer-cta:hover { transform: scale(1.04); background: #fff; }
+
+        @media (max-width: 768px) { .project-header { padding: 16px 20px; } .project-footer { padding: 60px 24px; } }
+    </style>
+</head>
+<body>
+    <header class="project-header">
+        <div class="project-header-left">
+            <a href="javascript:void(0)" onclick="history.back()" class="project-back" title="Back to portfolio">&larr;</a>
+            <div>
+                <div class="project-header-title">REMGEN</div>
+                <div class="project-header-author">Martina Marino — 2024</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="project-stream">
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400/1bba46210605229.67142d37b1d80.gif" alt="REMGEN — Hero" loading="eager"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/218a03210605229.67153de9a0165.png" alt="REMGEN — Overview" loading="eager"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/748e6d210605229.67153de9a0738.png" alt="REMGEN — Details" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400/42d04d210605229.67153de9a0f1a.gif" alt="REMGEN — Interaction" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400/b2b90e210605229.67153de9a16d0.gif" alt="REMGEN — Flow" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400/d1fa08210605229.67153de9a2792.gif" alt="REMGEN — Animation" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400/16cef9210605229.67153de99fb3c.gif" alt="REMGEN — Closing" loading="lazy"></div></div>
+    </main>
+
+    <footer class="project-footer">
+        <h2 class="project-footer-title">Interested in working together?</h2>
+        <p class="project-footer-sub">This project was designed and art-directed by Martina Marino. Get in touch to discuss your next project.</p>
+        <a href="mailto:martinamarinodesign@gmail.com" class="project-footer-cta">Get in touch &rarr;</a>
+    </footer>
+
+    <script>
+        const revealObserver = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); revealObserver.unobserve(entry.target); } }); }, { threshold: 0.05 });
+        document.querySelectorAll('.project-module').forEach(mod => revealObserver.observe(mod));
+        document.querySelectorAll('.img-loading img').forEach(img => { if (img.complete && img.naturalHeight > 0) { img.parentElement.classList.add('loaded'); } else { img.addEventListener('load', () => { img.parentElement.classList.add('loaded'); }); } });
+    </script>
+</body>
+</html>

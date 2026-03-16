@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polestar Redesign</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #000; color: #f5f5f5; overflow-x: hidden; }
+
+        .project-header { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; padding: 20px 40px; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .project-header-left { display: flex; align-items: center; gap: 16px; }
+        .project-back { width: 40px; height: 40px; border-radius: 50%; background: rgba(245,245,245,0.08); border: none; color: #f5f5f5; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s ease; text-decoration: none; }
+        .project-back:hover { background: rgba(245,245,245,0.15); }
+        .project-header-title { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; color: #b5b5b5; }
+        .project-header-author { font-size: 13px; font-weight: 500; color: #666; }
+
+        .project-stream { width: 100%; display: flex; flex-direction: column; }
+        .project-module { width: 100%; opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .project-module.visible { opacity: 1; transform: translateY(0); }
+        .project-module img { width: 100%; height: auto; display: block; }
+
+        .img-loading { position: relative; overflow: hidden; background: #0a0a0a; }
+        .img-loading::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #0a0a0a 0%, #151515 40%, #1c1c1c 50%, #151515 60%, #0a0a0a 100%); background-size: 200% 100%; animation: shimmer 1.6s ease-in-out infinite; z-index: 1; transition: opacity 0.5s ease; pointer-events: none; }
+        .img-loading.loaded::after { opacity: 0; }
+
+        .video-wrap { position: relative; width: 100%; background: #000; overflow: hidden; }
+        .video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        .video-wrap::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #0a0a0a 0%, #151515 40%, #1c1c1c 50%, #151515 60%, #0a0a0a 100%); background-size: 200% 100%; animation: shimmer 1.6s ease-in-out infinite; z-index: 1; transition: opacity 0.5s ease; pointer-events: none; }
+        .video-wrap.loaded::after { opacity: 0; }
+
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        .project-footer { padding: 80px 40px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+        .project-footer-title { font-size: clamp(24px, 3vw, 40px); font-weight: 500; color: #f5f5f5; }
+        .project-footer-sub { font-size: 16px; color: #888; max-width: 500px; line-height: 1.6; }
+        .project-footer-cta { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: #f5f5f5; color: #171717; border-radius: 999px; font-size: 16px; font-weight: 600; text-decoration: none; transition: transform 0.2s ease, background 0.2s ease; }
+        .project-footer-cta:hover { transform: scale(1.04); background: #fff; }
+
+        @media (max-width: 768px) { .project-header { padding: 16px 20px; } .project-footer { padding: 60px 24px; } }
+    </style>
+</head>
+<body>
+    <header class="project-header">
+        <div class="project-header-left">
+            <a href="javascript:void(0)" onclick="history.back()" class="project-back" title="Back to portfolio">&larr;</a>
+            <div>
+                <div class="project-header-title">Polestar Redesign</div>
+                <div class="project-header-author">Martina Marino — 2024</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="project-stream">
+        <!-- 0-8: Images -->
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/fe324d210550095.69a9ce977b28c.png" alt="Polestar Redesign" loading="eager"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/56117d210550095.69a9ce977c0b5.png" alt="Polestar Redesign" loading="eager"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/28bc5d210550095.69a9ce977b8f0.png" alt="Polestar Redesign" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/196259210550095.699d9bde86b18.png" alt="Polestar Redesign" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/2baf9f210550095.699d9bde8600b.png" alt="Polestar Redesign" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/9fdf38210550095.67141630684f1.png" alt="Polestar Redesign" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/409c80210550095.699dade1d0353.png" alt="Polestar Redesign" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/6639c7210550095.69a9ef1951dc1.png" alt="Polestar Redesign" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/f8cd0b210550095.699da9889041b.png" alt="Polestar Redesign" loading="lazy"></div></div>
+
+        <!-- 9: Vimeo — 47.67% -->
+        <div class="project-module">
+            <div class="video-wrap" style="padding-bottom: 47.67%;">
+                <iframe data-src="https://player.vimeo.com/video/1167712841?background=1&loop=1&muted=1&autoplay=1&badge=0" allow="autoplay; fullscreen"></iframe>
+            </div>
+        </div>
+
+        <!-- 10-12: Images -->
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/60c371210550095.699dade1d12a0.png" alt="Polestar Redesign" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/4cdaad210550095.69a9ee8eaf2e5.png" alt="Polestar Redesign" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/4bbabf210550095.699da988916c5.png" alt="Polestar Redesign" loading="lazy"></div></div>
+
+        <!-- 13: Vimeo — 55.24% -->
+        <div class="project-module">
+            <div class="video-wrap" style="padding-bottom: 55.24%;">
+                <iframe data-src="https://player.vimeo.com/video/1167712827?background=1&loop=1&muted=1&autoplay=1&badge=0&autopause=0" allow="autoplay; fullscreen"></iframe>
+            </div>
+        </div>
+
+        <!-- 14-15: Images -->
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/53efff210550095.699dade1d0954.png" alt="Polestar Redesign" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/9b6517210550095.699dade1d1b58.png" alt="Polestar Redesign" loading="lazy"></div></div>
+    </main>
+
+    <footer class="project-footer">
+        <h2 class="project-footer-title">Interested in working together?</h2>
+        <p class="project-footer-sub">This project was designed and art-directed by Martina Marino. Get in touch to discuss your next project.</p>
+        <a href="mailto:martinamarinodesign@gmail.com" class="project-footer-cta">Get in touch &rarr;</a>
+    </footer>
+
+    <script>
+        const revealObserver = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); revealObserver.unobserve(entry.target); } }); }, { threshold: 0.05 });
+        document.querySelectorAll('.project-module').forEach(mod => revealObserver.observe(mod));
+        document.querySelectorAll('.img-loading img').forEach(img => { if (img.complete && img.naturalHeight > 0) { img.parentElement.classList.add('loaded'); } else { img.addEventListener('load', () => { img.parentElement.classList.add('loaded'); }); } });
+        const iframeObserver = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { const iframe = entry.target.querySelector('iframe[data-src]'); if (iframe) { iframe.src = iframe.dataset.src; iframe.removeAttribute('data-src'); iframe.addEventListener('load', () => { entry.target.classList.add('loaded'); }); } iframeObserver.unobserve(entry.target); } }); }, { rootMargin: '800px 0px' });
+        document.querySelectorAll('.video-wrap').forEach(wrap => iframeObserver.observe(wrap));
+    </script>
+</body>
+</html>

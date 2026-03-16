@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IKEA — Naturally Indoors</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #000; color: #f5f5f5; overflow-x: hidden; }
+
+        .project-header { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; padding: 20px 40px; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .project-header-left { display: flex; align-items: center; gap: 16px; }
+        .project-back { width: 40px; height: 40px; border-radius: 50%; background: rgba(245,245,245,0.08); border: none; color: #f5f5f5; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s ease; text-decoration: none; }
+        .project-back:hover { background: rgba(245,245,245,0.15); }
+        .project-header-title { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; color: #b5b5b5; }
+        .project-header-author { font-size: 13px; font-weight: 500; color: #666; }
+
+        .project-stream { width: 100%; display: flex; flex-direction: column; }
+        .project-module { width: 100%; opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .project-module.visible { opacity: 1; transform: translateY(0); }
+        .project-module img { width: 100%; height: auto; display: block; }
+
+        .img-loading { position: relative; overflow: hidden; background: #0a0a0a; }
+        .img-loading::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #0a0a0a 0%, #151515 40%, #1c1c1c 50%, #151515 60%, #0a0a0a 100%); background-size: 200% 100%; animation: shimmer 1.6s ease-in-out infinite; z-index: 1; transition: opacity 0.5s ease; pointer-events: none; }
+        .img-loading.loaded::after { opacity: 0; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        .project-footer { padding: 80px 40px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+        .project-footer-title { font-size: clamp(24px, 3vw, 40px); font-weight: 500; color: #f5f5f5; }
+        .project-footer-sub { font-size: 16px; color: #888; max-width: 500px; line-height: 1.6; }
+        .project-footer-cta { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: #f5f5f5; color: #171717; border-radius: 999px; font-size: 16px; font-weight: 600; text-decoration: none; transition: transform 0.2s ease, background 0.2s ease; }
+        .project-footer-cta:hover { transform: scale(1.04); background: #fff; }
+
+        @media (max-width: 768px) { .project-header { padding: 16px 20px; } .project-footer { padding: 60px 24px; } }
+    </style>
+</head>
+<body>
+    <header class="project-header">
+        <div class="project-header-left">
+            <a href="javascript:void(0)" onclick="history.back()" class="project-back" title="Back to portfolio">&larr;</a>
+            <div>
+                <div class="project-header-title">IKEA — Naturally Indoors</div>
+                <div class="project-header-author">Martina Marino — 2024</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="project-stream">
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/a8cd83210654083.67155d05d9904.png" alt="IKEA — Naturally Indoors" loading="eager"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/552809210654083.67155d05d890c.png" alt="IKEA — Naturally Indoors" loading="eager"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400/024279210654083.67155d05d2d58.gif" alt="IKEA — Naturally Indoors" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400/b04854210654083.67155d05d22fc.gif" alt="IKEA — Naturally Indoors" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400/6db0d8210654083.67155d05d3d5e.gif" alt="IKEA — Naturally Indoors" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400/66073f210654083.67155d05d8fe8.gif" alt="IKEA — Naturally Indoors" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/8ca695210654083.67155d05d64f1.png" alt="IKEA — Naturally Indoors" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/9c9d85210654083.67155d05d7fdc.png" alt="IKEA — Naturally Indoors" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/f232f6210654083.67155d05d7672.png" alt="IKEA — Naturally Indoors" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/25e07a210654083.67155d05d5dc0.png" alt="IKEA — Naturally Indoors" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/629d25210654083.67155d05d3475.png" alt="IKEA — Naturally Indoors" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/3f6e4b210654083.67155d05d4453.png" alt="IKEA — Naturally Indoors" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/57d69e210654083.67155d05d4da3.png" alt="IKEA — Naturally Indoors" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/5f118e210654083.67155d05d286c.png" alt="IKEA — Naturally Indoors" loading="lazy"></div></div>
+        <div class="project-module"><div class="img-loading"><img src="https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/703734210654083.67155d05d56ab.png" alt="IKEA — Naturally Indoors" loading="lazy"></div></div>
+    </main>
+
+    <footer class="project-footer">
+        <h2 class="project-footer-title">Interested in working together?</h2>
+        <p class="project-footer-sub">This project was designed and art-directed by Martina Marino. Get in touch to discuss your next project.</p>
+        <a href="mailto:martinamarinodesign@gmail.com" class="project-footer-cta">Get in touch &rarr;</a>
+    </footer>
+
+    <script>
+        const revealObserver = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); revealObserver.unobserve(entry.target); } }); }, { threshold: 0.05 });
+        document.querySelectorAll('.project-module').forEach(mod => revealObserver.observe(mod));
+        document.querySelectorAll('.img-loading img').forEach(img => { if (img.complete && img.naturalHeight > 0) { img.parentElement.classList.add('loaded'); } else { img.addEventListener('load', () => { img.parentElement.classList.add('loaded'); }); } });
+    </script>
+</body>
+</html>
